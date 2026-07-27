@@ -41,11 +41,9 @@ closePanelButtons.forEach(btn => {
   });
 });
 
-const sceneSelectCustom = document.getElementById("sceneSelectCustom");
-const sceneSelectTrigger = document.getElementById("sceneSelectTrigger");
-const sceneSelectTriggerLabel = document.getElementById("sceneSelectTriggerLabel");
-const sceneSelectOptions = document.getElementById("sceneSelectOptions");
-const sceneOptionEls = document.querySelectorAll(".scene-select-option");
+// CUSTOM HTML DROPDOWN LOGIC FOR SCENE SELECTION
+const sceneDropdownSelected = document.getElementById("sceneDropdownSelected");
+const sceneOptionsList = document.getElementById("sceneOptionsList");
 const sceneVideo = document.getElementById("sceneVideo");
 
 const sceneSounds = {
@@ -71,32 +69,31 @@ function playSceneSound(sceneName) {
 
   currentSceneAudio = sceneSounds[sceneName];
 
-  currentSceneAudio.volume = sceneVolumeSlider.value / 100;
-  currentSceneAudio.muted = isMuted;
-
-  currentSceneAudio.play().catch(() => {});
+  if (currentSceneAudio) {
+    currentSceneAudio.volume = sceneVolumeSlider.value / 100;
+    currentSceneAudio.muted = isMuted;
+    currentSceneAudio.play().catch(() => {});
+  }
 }
 
-// Trigger button click karne se dropdown khulta/band hota hai
-sceneSelectTrigger.addEventListener("click", () => {
-  sceneSelectCustom.classList.toggle("open");
-  sceneSelectOptions.classList.toggle("hidden");
+// Toggle Dropdown Menu Open/Close
+sceneDropdownSelected.addEventListener("click", (e) => {
+  e.stopPropagation();
+  sceneOptionsList.classList.toggle("show");
 });
 
-// Kisi option pe click karne se scene change ho jaati hai
-sceneOptionEls.forEach((optionEl) => {
-  optionEl.addEventListener("click", () => {
-    const value = optionEl.dataset.value;
+// Dropdown item selection logic
+sceneOptionsList.querySelectorAll(".option").forEach(option => {
+  option.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const value = option.getAttribute("data-value");
+    const text = option.innerText;
 
-    // Trigger label aur "active" state update karo
-    sceneSelectTriggerLabel.textContent = optionEl.textContent;
-    sceneOptionEls.forEach((el) => el.classList.remove("active"));
-    optionEl.classList.add("active");
+    // Update UI
+    sceneDropdownSelected.querySelector("span:first-child").innerText = text;
+    sceneOptionsList.classList.remove("show");
 
-    // Dropdown band karo
-    sceneSelectCustom.classList.remove("open");
-    sceneSelectOptions.classList.add("hidden");
-
+    // Change Video & Audio
     sceneVideo.src = "videos/" + value + ".mp4";
     sceneVideo.load();
     sceneVideo.play();
@@ -105,11 +102,11 @@ sceneOptionEls.forEach((optionEl) => {
   });
 });
 
-// Bahar kahin bhi click karne se dropdown apne aap band ho jaaye
-document.addEventListener("click", (e) => {
-  if (!sceneSelectCustom.contains(e.target)) {
-    sceneSelectCustom.classList.remove("open");
-    sceneSelectOptions.classList.add("hidden");
+// Auto Close dropdown when clicking outside
+window.addEventListener("click", (e) => {
+  const customDropdown = document.getElementById("sceneDropdown");
+  if (customDropdown && !customDropdown.contains(e.target)) {
+    sceneOptionsList.classList.remove("show");
   }
 });
 

@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FocusVerse — Cozy Study Desk & Chair</title>
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    body:not(.auth-checked) .app-shell { visibility: hidden; }
+  </style>
 </head>
 <body>
 
   <div class="app-shell">
 
-    <!-- LEFT MINI SIDEBAR -->
     <aside class="left-sidebar">
       <div class="nav-item" data-target="section-pomodoro" title="Timer">
         <span class="nav-icon">⏳</span>
@@ -34,10 +37,8 @@
       </div>
     </aside>
 
-    <!-- MAIN ROOM AREA -->
     <main class="room-container">
-      
-      <!-- FLOATING OVERLAY PANELS -->
+
       <div class="floating-panels">
         <section class="sidebar-section timer-card dynamic-panel hidden" id="section-pomodoro">
           <div class="panel-header">
@@ -172,22 +173,21 @@
         </section>
       </div>
 
-      <!-- ENVIRONMENT COMPOSITION -->
       <div class="cozy-study-environment">
-        
+
         <div class="scene-dropdown-wrapper">
-          <div class="scene-select-custom" id="sceneSelectCustom">
-            <button type="button" class="scene-select-trigger" id="sceneSelectTrigger">
-              <span id="sceneSelectTriggerLabel">🌧️ Rain Scene</span>
-              <span class="scene-select-arrow">▾</span>
-            </button>
-            <ul class="scene-select-options hidden" id="sceneSelectOptions">
-              <li class="scene-select-option active" data-value="rain">🌧️ Rain Scene</li>
-              <li class="scene-select-option" data-value="sunny">☀️ Sunny Scene</li>
-              <li class="scene-select-option" data-value="snowy">❄️ Snowy Scene</li>
-              <li class="scene-select-option" data-value="windy">🍃 Windy Scene</li>
-              <li class="scene-select-option" data-value="night">🌙 Night Scene</li>
-            </ul>
+          <div class="custom-dropdown" id="sceneDropdown">
+            <div class="selected-option" id="sceneDropdownSelected">
+              <span>🌧️ Rain Scene</span>
+              <span class="arrow">▾</span>
+            </div>
+            <div class="options-list" id="sceneOptionsList">
+              <div class="option" data-value="rain">🌧️ Rain Scene</div>
+              <div class="option" data-value="sunny">☀️ Sunny Scene</div>
+              <div class="option" data-value="snowy">❄️ Snowy Scene</div>
+              <div class="option" data-value="windy">🍃 Windy Scene</div>
+              <div class="option" data-value="night">🌙 Night Scene</div>
+            </div>
           </div>
 
           <button id="sceneMuteBtn" class="scene-mute-btn" title="Mute/Unmute">🔊</button>
@@ -208,7 +208,6 @@
         <audio id="audioWindy" src="sounds/windy.mp3" loop></audio>
         <audio id="audioNight" src="sounds/night-crickets.mp3" loop></audio>
 
-        <!-- THE ARCHED WINDOW -->
         <div class="window-frame">
           <section class="window-box" id="windowBox">
             <video id="sceneVideo" class="window-video" autoplay muted loop playsinline>
@@ -222,9 +221,8 @@
           <div class="sticky-wall sticky-wall-left" id="stickyWallLeft"></div>
         </div>
 
-        <!-- 4-LEGGED DIMENSIONAL WOODEN STUDY DESK -->
         <div class="real-study-desk">
-          
+
           <div class="desk-top-surface">
             <div class="custom-desk-lamp">
               <svg class="lamp-svg" viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg">
@@ -260,7 +258,6 @@
 
         </div>
 
-        <!-- CHARACTER + CHAIR -->
         <div class="study-chair-character">
           <div class="cozy-chair-backrest"></div>
           <img src="./images/anime-character.png" class="anime-character" alt="FocusVerse Character">
@@ -307,6 +304,7 @@
     </div>
   </div>
 
+  <script src="authGuard.js"></script>
   <script src="script.js"></script>
   <script src="timer.js"></script>
 </body>
