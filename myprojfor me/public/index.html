@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusVerse — Cozy Study Desk & Chair</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Ye inline style TURANT parse hoti hai (browser <head> ko HTML
+       render karne se PEHLE padhta hai) — isliye ".app-shell" (poora
+       room) SHURU se hi chhupa rehta hai. Jab tak "authGuard.js" login
+       check complete kar ke ".auth-checked" class body pe na laga de,
+       ye visible NAHI hoga — isliye ab wo "room dikha, phir signup pe
+       jump" wala flash kabhi nahi hoga. -->
+  <style>
+    body:not(.auth-checked) .app-shell { visibility: hidden; }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- LEFT MINI SIDEBAR -->
+    <aside class="left-sidebar">
+      <div class="nav-item" data-target="section-pomodoro" title="Timer">
+        <span class="nav-icon">⏳</span>
+        <span class="nav-text">Timer</span>
+      </div>
+      <div class="nav-item" data-target="section-todos" title="Todos">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Todos</span>
+      </div>
+      <div class="nav-item" data-target="section-stats" title="Stats">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Stats</span>
+      </div>
+      <div class="nav-item" data-target="section-level" title="Level">
+        <span class="nav-icon">⭐</span>
+        <span class="nav-text">Level</span>
+      </div>
+      <div class="nav-item" data-target="section-notes" title="Sticky Notes">
+        <span class="nav-icon">📝</span>
+        <span class="nav-text">Notes</span>
+      </div>
+    </aside>
+
+    <!-- MAIN ROOM AREA -->
+    <main class="room-container">
+      
+      <!-- FLOATING OVERLAY PANELS -->
+      <div class="floating-panels">
+        <section class="sidebar-section timer-card dynamic-panel hidden" id="section-pomodoro">
+          <div class="panel-header">
+            <h2>⏳ Focus Session</h2>
+            <button class="close-panel-btn">&times;</button>
+          </div>
+          <div class="mode-tabs">
+            <button id="studyModeBtn" class="mode-tab active" data-mode="study">Study Mode</button>
+            <button id="breakModeBtn" class="mode-tab" data-mode="break">Break Mode</button>
+          </div>
+          <div class="mode-inputs">
+            <label class="mode-input-label">
+              Study minutes:
+              <input type="number" id="studyMinutesInput" class="mode-input" value="25" min="1">
+            </label>
+            <label class="mode-input-label">
+              Break minutes:
+              <input type="number" id="breakMinutesInput" class="mode-input" value="5" min="1">
+            </label>
+          </div>
+          <div id="timerDisplay" class="timer-display">25:00</div>
+          <div class="timer-controls">
+            <button id="startBtn" class="timer-btn">Start</button>
+            <button id="pauseBtn" class="timer-btn">Pause</button>
+            <button id="resetBtn" class="timer-btn">Reset</button>
+          </div>
+        </section>
+
+        <section class="sidebar-section dynamic-panel hidden" id="section-todos">
+          <div class="panel-header">
+            <h2>📋 Todos</h2>
+            <button class="close-panel-btn">&times;</button>
+          </div>
+          <div class="add-todo-box">
+            <input type="text" id="titleInput" placeholder="What's New?">
+            <select id="priorityInput">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+            </select>
+            <button id="addBtn">Add</button>
+          </div>
+          <div id="todoList" class="todo-list"></div>
+        </section>
+
+        <section class="sidebar-section stats-card dynamic-panel hidden" id="section-stats">
+          <div class="panel-header">
+            <h2>📊 Stats</h2>
+            <button class="close-panel-btn">&times;</button>
+          </div>
+
+          <p class="stats-group-label">Today</p>
+          <div class="stats-body">
+            <div class="stat-item">
+              <span class="stat-value" id="statTodaySessions">0</span>
+              <span class="stat-label">Sessions Today</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="statTodayMinutes">0</span>
+              <span class="stat-label">Minutes Today</span>
+            </div>
+          </div>
+
+          <p class="stats-group-label">All-Time</p>
+          <div class="stats-body">
+            <div class="stat-item">
+              <span class="stat-value" id="statSessionsCount">0</span>
+              <span class="stat-label">Sessions Completed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="statTotalMinutes">0</span>
+              <span class="stat-label">Total Study Minutes</span>
+            </div>
+          </div>
+
+          <p class="stats-group-label">Last 7 Days</p>
+          <ul class="stats-history-list" id="statsHistoryList"></ul>
+
+          <button id="clearStatsBtn" class="clear-stats-btn">Clear Stats</button>
+        </section>
+
+        <section class="sidebar-section level-card dynamic-panel hidden" id="section-level">
+          <div class="panel-header">
+            <h2>⭐ Level & XP</h2>
+            <button class="close-panel-btn">&times;</button>
+          </div>
+
+          <div class="xp-card">
+            <div class="xp-level-row">
+              <span class="xp-level-label">Level <span id="levelDisplay">1</span></span>
+              <span class="xp-number" id="xpNumberDisplay">0 XP</span>
+            </div>
+            <div class="xp-bar-track">
+              <div class="xp-bar-fill" id="xpBarFill"></div>
+            </div>
+            <p class="xp-next-level-text" id="xpNextLevelText">200 XP to next level</p>
+          </div>
+
+          <p class="stats-group-label">How XP works</p>
+          <ul class="xp-earn-list">
+            <li class="xp-earn-row">
+              <span class="xp-earn-label">📋 Complete a Todo</span>
+              <span class="xp-earn-amount">+20 XP</span>
+            </li>
+            <li class="xp-earn-row">
+              <span class="xp-earn-label">⏳ Complete a Study Session</span>
+              <span class="xp-earn-amount">+50 XP</span>
+            </li>
+          </ul>
+          <p class="xp-rule-text">Every <strong>200 XP</strong> = 1 Level up.</p>
+
+          <button id="resetXpBtn" class="clear-stats-btn">Reset XP &amp; Level</button>
+        </section>
+
+        <section class="sidebar-section dynamic-panel hidden" id="section-notes">
+          <div class="panel-header">
+            <h2>📝 Sticky Notes</h2>
+            <button class="close-panel-btn">&times;</button>
+          </div>
+          <div class="add-todo-box">
+            <input type="text" id="noteInput" placeholder="Quick note..." maxlength="60">
+            <button id="addNoteBtn">Add</button>
+          </div>
+
+          <div class="note-color-picker">
+            <button class="note-color-swatch color-pink active" data-color="pink" title="Pink"></button>
+            <button class="note-color-swatch color-blue" data-color="blue" title="Blue"></button>
+            <button class="note-color-swatch color-yellow" data-color="yellow" title="Yellow"></button>
+          </div>
+
+          <p class="note-hint">Your note will fly onto the wall beside the window 📌</p>
+        </section>
+      </div>
+
+      <!-- ENVIRONMENT COMPOSITION -->
+      <div class="cozy-study-environment">
+        
+        <div class="scene-dropdown-wrapper">
+          <select id="sceneDropdown" class="scene-select-dropdown">
+            <option value="rain" selected>🌧️ Rain Scene</option>
+            <option value="sunny">☀️ Sunny Scene</option>
+            <option value="snowy">❄️ Snowy Scene</option>
+            <option value="windy">🍃 Windy Scene</option>
+            <option value="night">🌙 Night Scene</option>
+          </select>
+
+          <button id="sceneMuteBtn" class="scene-mute-btn" title="Mute/Unmute">🔊</button>
+          <input
+            type="range"
+            id="sceneVolumeSlider"
+            class="scene-volume-slider"
+            min="0"
+            max="100"
+            value="50"
+            title="Ambient sound volume"
+          >
+        </div>
+
+        <audio id="audioRain" src="sounds/rain.mp3" loop></audio>
+        <audio id="audioSunny" src="sounds/daytime-birds.mp3" loop></audio>
+        <audio id="audioSnowy" src="sounds/snow-wind.mp3" loop></audio>
+        <audio id="audioWindy" src="sounds/windy.mp3" loop></audio>
+        <audio id="audioNight" src="sounds/night-crickets.mp3" loop></audio>
+
+        <!-- THE ARCHED WINDOW -->
+        <div class="window-frame">
+          <section class="window-box" id="windowBox">
+            <video id="sceneVideo" class="window-video" autoplay muted loop playsinline>
+              <source src="videos/rain.mp4" type="video/mp4">
+            </video>
+          </section>
+          <div class="window-pane-divider-v"></div>
+          <div class="window-pane-divider-h"></div>
+
+          <div class="sticky-wall sticky-wall-right" id="stickyWallRight"></div>
+          <div class="sticky-wall sticky-wall-left" id="stickyWallLeft"></div>
+        </div>
+
+        <!-- 4-LEGGED DIMENSIONAL WOODEN STUDY DESK -->
+        <div class="real-study-desk">
+          
+          <div class="desk-top-surface">
+            <div class="custom-desk-lamp">
+              <svg class="lamp-svg" viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg">
+                <ellipse class="lamp-light-pool" cx="65" cy="56" rx="26" ry="15"/>
+                <ellipse class="lamp-base-shape" cx="26" cy="92" rx="15" ry="4.5"/>
+                <path class="lamp-neck" d="M26,88 C26,64 26,44 48,34"/>
+                <polygon class="lamp-shade-shape" points="42,23 68,31 61,49 39,40"/>
+              </svg>
+            </div>
+
+            <div class="desk-laptop">
+              <div class="laptop-screen">💻</div>
+            </div>
+
+            <div class="desk-coffee-cup" title="Your coffee, still warm">
+              <span class="coffee-steam steam-1"></span>
+              <span class="coffee-steam steam-2"></span>
+              <span class="coffee-steam steam-3"></span>
+              <div class="coffee-cup-body">
+                <div class="coffee-cup-liquid"></div>
+                <div class="coffee-cup-handle"></div>
+              </div>
+              <div class="coffee-cup-saucer"></div>
+            </div>
+          </div>
+
+          <div class="desk-legs-container">
+            <div class="desk-leg leg-front-left"></div>
+            <div class="desk-leg leg-back-left"></div>
+            <div class="desk-leg leg-back-right"></div>
+            <div class="desk-leg leg-front-right"></div>
+          </div>
+
+        </div>
+
+        <!-- CHARACTER + CHAIR -->
+        <div class="study-chair-character">
+          <div class="cozy-chair-backrest"></div>
+          <img src="./images/anime-character.png" class="anime-character" alt="FocusVerse Character">
+          <div class="chair-base-stand"></div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <div id="floatingTimerWidget" class="floating-timer-widget ft-hidden" title="Click to open Timer">
+    <span class="floating-timer-icon">⏳</span>
+    <span id="floatingTimerText" class="floating-timer-text">25:00</span>
+  </div>
+
+  <audio id="alarmSound" src="alarm.mp3.wav" loop></audio>
+  <div id="alarmModal" class="alarm-modal hidden">
+    <div class="alarm-card">
+      <p class="alarm-heading">Session complete! 🌸</p>
+      <button id="dismissBtn" class="timer-btn">Dismiss</button>
+    </div>
+  </div>
+
+  <div id="clearConfirmModal" class="alarm-modal hidden">
+    <div class="alarm-card">
+      <p class="alarm-heading">Clear all session records?</p>
+      <p class="confirm-subtext">This will permanently delete your stats. This can't be undone.</p>
+      <div class="confirm-actions">
+        <button id="cancelClearBtn" class="timer-btn">Cancel</button>
+        <button id="confirmClearBtn" class="timer-btn confirm-danger-btn">Yes, Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resetXpConfirmModal" class="alarm-modal hidden">
+    <div class="alarm-card">
+      <p class="alarm-heading">Reset XP and Level?</p>
+      <p class="confirm-subtext">This will permanently reset your XP back to 0 and Level back to 1. This can't be undone.</p>
+      <div class="confirm-actions">
+        <button id="cancelResetXpBtn" class="timer-btn">Cancel</button>
+        <button id="confirmResetXpBtn" class="timer-btn confirm-danger-btn">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="authGuard.js"></script>
+  <script src="script.js"></script>
+  <script src="timer.js"></script>
+</body>
+</html>
